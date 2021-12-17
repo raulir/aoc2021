@@ -1,7 +1,6 @@
 <?php
 print('<pre>');
 $start = microtime(true);
-$data;
 
 $handle = fopen('input.txt', 'r');
 if ($handle) {

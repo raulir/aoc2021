@@ -1,7 +1,6 @@
 <?php
 print('<pre>');
 $start = microtime(true);
-$data;
 
 $handle = fopen('input.txt', 'r');
 if ($handle) {
@@ -40,7 +39,6 @@ function parse_packet($binary) {
 		$GLOBALS['version_sum'] += $packet['version'];
 	}
 	
-// print('|'.$binary."\n");
 	if(!empty($binary)){
 		list($type, $binary) = preg_split('/(?<=.{3})/', $binary, 2);
 		$packet['type'] = bindec($type);
