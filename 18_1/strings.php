@@ -2,6 +2,14 @@
 print('<pre>');
 $start = microtime(true);
 
+// print debug values?
+$debug = true;
+
+function _print($str){
+	global $debug;
+	if ($debug) print($str);
+}
+
 $data = [];
 
 $handle = fopen('input.txt', 'r');
@@ -16,6 +24,29 @@ if ($handle) {
 	}
 
 	fclose($handle);
+
+}
+
+/* up to base 59 functions */
+function to_base($dec){
+	
+	if ($dec <= 35){
+		return base_convert($dec, 10, 36);
+	}
+	
+	return chr($dec - 36 + 65);
+	
+}
+
+function from_base($base){
+	
+	$value = ord($base);
+	
+	if ($value < 58 || $value > 96){
+		return base_convert($base, 36, 10);
+	}
+
+	return $value - 65 + 36;
 
 }
 
@@ -41,8 +72,11 @@ function split($a){
 			
 		if (ctype_alpha($av)){
 			
-			$value = base_convert($av, 35, 10);
-			$a = substr($a, 0, $ak).'['.base_convert(floor($value/2), 10, 35).','.base_convert(ceil($value/2), 10, 35).']'.substr($a, $ak + 1);
+			$value = from_base($av);
+			$a = substr($a, 0, $ak).'['.to_base(floor($value/2)).','.to_base(ceil($value/2)).']'.substr($a, $ak + 1);
+			
+			_print(' split:  '.$a."\n");
+			
 			return $a;
 
 		}
@@ -103,21 +137,23 @@ function expl($a){
 	
 	if (isset($reduce_point)){
 			
-		$first_num = base_convert($aa[$reduce_point + 1], 35, 10);
-		$second_num = base_convert($aa[$reduce_point + 3], 35, 10);
+		$first_num = from_base($aa[$reduce_point + 1]);
+		$second_num = from_base($aa[$reduce_point + 3]);
 	
 		if (isset($last_numeric)){
-			$last_numeric_value = base_convert($aa[$last_numeric], 35, 10);
-			$a = substr_replace($a, base_convert($last_numeric_value + $first_num, 10, 35), $last_numeric, 1);
+			$last_numeric_value = from_base($aa[$last_numeric]);
+			$a = substr_replace($a, to_base($last_numeric_value + $first_num), $last_numeric, 1);
 		}
 			
 		if (isset($next_numeric)){
-			$next_numeric_value = base_convert($aa[$next_numeric], 35, 10);
-			$a = substr_replace($a, base_convert($next_numeric_value + $second_num, 10, 35), $next_numeric, 1);
+			$next_numeric_value = from_base($aa[$next_numeric]);
+			$a = substr_replace($a, to_base($next_numeric_value + $second_num), $next_numeric, 1);
 		}
 			
 		$a = substr($a, 0, $reduce_point).'0'.substr($a, $reduce_point + 5);
 
+		_print('  expl:  '.$a."\n");
+		
 	}
 	
 	return $a;
@@ -135,20 +171,30 @@ function reduce($a){
 		
 		$a = split($a);
 
-		// split
-		
-		print(' split:  '.$a."\n");
-		
 		$ao = '';
 		while ($ao != $a){
 			$ao = $a;
 			$a = expl($a);
-			print('  expl:  '.$a."\n");
 		}
 	
 	}
 
 	return $a;
+	
+}
+
+/* magnitude */
+function magnitude($a){
+	
+	if (is_array($a[0])){
+		$a[0] = magnitude(array_values($a[0]));
+	}
+	
+	if (is_array($a[1])){
+		$a[1] = magnitude(array_values($a[1]));
+	}
+	
+	return 3 * (int)$a[0] + 2 * (int)$a[1];
 	
 }
 
@@ -160,15 +206,37 @@ foreach($data as $key => $number){
 	
 	$sum = add($sum, $number);
 	
-	print('number:  '.$number."\n");
-	print('rawsum:  '.$sum."\n");
+	_print('number:  '.$number."\n");
+	_print('rawsum:  '.$sum."\n");
 	
 	$sum = reduce($sum);
 	
-	print('sum:     '.$sum."\n\n");
+	_print('sum:     '.$sum."\n");
+	_print('magnit:  '.magnitude(json_decode($sum))."\n\n");
 	
 }
 
 print(round((microtime(true) - $start)*1000, 1) . "ms\n\n");
 
-print_r('');
+print(magnitude(json_decode($sum))."\n\n");
+
+/* second part */
+$start = microtime(true);
+
+$max_magnitude = '';
+
+foreach($data as $n1){
+	foreach($data as $n2){
+
+		if ($n1 !== $n2){
+			$sum = reduce(add($n1, $n2));
+			$max_magnitude = max(magnitude(json_decode($sum)), $max_magnitude);
+			print("\n");
+		}
+
+	}
+}
+
+print(round((microtime(true) - $start)*1000, 1) . "ms\n\n");
+
+print($max_magnitude);
