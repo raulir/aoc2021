@@ -3,7 +3,7 @@ print('<pre>');
 $start = microtime(true);
 
 // print debug values?
-$debug = true;
+$debug = false;
 
 function _print($str){
 	global $debug;
@@ -231,7 +231,7 @@ foreach($data as $n1){
 		if ($n1 !== $n2){
 			$sum = reduce(add($n1, $n2));
 			$max_magnitude = max(magnitude(json_decode($sum)), $max_magnitude);
-			print("\n");
+			_print("\n");
 		}
 
 	}
