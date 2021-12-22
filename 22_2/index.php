@@ -203,12 +203,14 @@ _print('step: ' . $key . '/'.(count($data)-1).' - cubes: '.count($cubes)."\n");
 }
 
 $sum = 0;
+$count = 0;
 foreach($cubes as $cube){
 	if ($cube['value'] == 1){
 		$sum+= ($cube['x2'] - $cube['x1'] + 1)*($cube['y2'] - $cube['y1'] + 1)*($cube['z2'] - $cube['z1'] + 1);
+		$count++;
 	}
 }
-
+_print($count."\n");
 
 print(round((microtime(true) - $start)*1000, 1) . "ms\n\n");
 
